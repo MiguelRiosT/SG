@@ -83,12 +83,16 @@ def main():
     global submarine_direction_x, submarine_image  # Declarar submarine_direction_x como global
 
     pygame.init()
+
+    icon_image = pygame.image.load("icono.png")
+    pygame.display.set_icon(icon_image)
+
     tank1 = Reservoir(1005, 2, 50000, 'air')
     submarine1 = Submarine(tank1, 2, 2, 150, 150)
     projectiles = []
 
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-    pygame.display.set_caption("SG")
+    pygame.display.set_caption("SubmarineeeGameee")
 
     original_submarine_image = pygame.image.load("submatron2.png").convert_alpha()
     background_image = pygame.image.load("fondonoche.png").convert()
