@@ -67,7 +67,12 @@ class Submarine:
         return self.pos_x, self.pos_y
 
     def set_direction(self, direction):
-        self.direction = direction
+        if direction < 0:
+            self.direction = -1
+        elif direction > 0:
+            self.direction = 1
+        else:
+            self.direction = 0
 
 class Projectile:
     def __init__(self, pos_x, pos_y, velocity_x, velocity_y, image_right, image_left, direction):
@@ -132,11 +137,11 @@ def main():
                     tank1.pumping_air_water('water')
                 elif event.key == K_LEFT:
                     submarine_image = pygame.transform.flip(original_submarine_image, True, False)
-                    submarine_direction_x = -1
+                    submarine_direction_x = -5 #cambia la velocidad en eje x
                     submarine1.set_direction(submarine_direction_x)
                 elif event.key == K_RIGHT:
                     submarine_image = original_submarine_image
-                    submarine_direction_x = 1
+                    submarine_direction_x = 10#cambia la velocidad en eje x
                     submarine1.set_direction(submarine_direction_x)
                 elif event.key == K_f:
                     new_projectile = Projectile(submarine1.pos_x, submarine1.pos_y, 6, 0.6, projectile_image_right, projectile_image_left, submarine1.direction)
