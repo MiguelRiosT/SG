@@ -5,4 +5,4 @@ Submarine Game es un juego en desarrollo pensado para aprender mediante la imple
 
 ## ICONO
 
-![SubmarineGameIcon](C:\GitHub\SG\SGDEV\icon.png)
+![SubmarineGameIcon](https://github.com/MiguelRiosT/SG/blob/DevMigue/SGDEV/icono.png)
