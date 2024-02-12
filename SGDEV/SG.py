@@ -5,19 +5,18 @@ import sys
 SCREEN_WIDTH = 1738
 SCREEN_HEIGHT = 971
 
-sea_level = 50
+sea_level = 25
 
-submarine_direction_x = 0  # 0 quieto, -1 izquierda, 1 derecha
+submarine_direction_x = 0
 submarine_image_pos_yLim = 500
 submarine_image_pos_y_init = sea_level
 
-# Variables físicas
-g = 9.8  # Gravedad constante
-p = 1000  # Densidad del fluido 1000 m^3/kg para el agua
-v = 1  # Volumen total del robot
-dt = 1  # Delta time. Depende de la frecuencia del reloj de la CPU y la complejidad computacional
-b = 250  # Constante de fricción
-e = - (p * g * v)  # Flotabilidad
+g = 9.8
+p = 1000
+v = 1
+dt = 1
+b = 250
+e = - (p * g * v)
 
 class Reservoir:
     def __init__(self, actual_level, valve_flow, max_capacity, fluid_to_pump):
@@ -46,7 +45,7 @@ class Submarine:
         self.mass = mass
         self.actual_velocity = actual_velocity
         self.tank = tank
-        self.direction = 1  # Inicializar la dirección a la derecha
+        self.direction = 1
 
     def calculate_mass(self):
         self.mass = self.tank.actual_level
@@ -76,16 +75,26 @@ class Submarine:
 
 class Projectile:
     def __init__(self, pos_x, pos_y, velocity_x, velocity_y, image_right, image_left, direction):
-        self.pos_x = pos_x
-        self.pos_y = pos_y
-        self.velocity_x = velocity_x * direction  # Ajusta la velocidad según la dirección
+        self.pos_x = pos_x + original_submarine_image.get_width() - image_right.get_width()
+        self.pos_y = pos_y + original_submarine_image.get_height() - image_right.get_height()
+        self.velocity_x = velocity_x * direction
         self.velocity_y = velocity_y
         self.image_right = image_right
         self.image_left = image_left
-        self.image = image_right if direction == 1 else image_left  # Inicializa la imagen según la dirección
+        self.image = image_right if direction == 1 else image_left
+
+    def check_collision(self):
+        if (
+                self.pos_x < 0
+                or self.pos_x > SCREEN_WIDTH - self.image.get_width()
+                or self.pos_y < 0
+                or self.pos_y > SCREEN_HEIGHT
+        ):
+            return True
+        return False
 
 def main():
-    global submarine_direction_x, submarine_image  # Declarar submarine_direction_x como global
+    global submarine_direction_x, submarine_image, original_submarine_image
 
     pygame.init()
 
@@ -104,6 +113,7 @@ def main():
     submarine_image = original_submarine_image
     projectile_image_right = pygame.image.load("proyectile.png").convert_alpha()
     projectile_image_left = pygame.transform.flip(projectile_image_right, True, False)
+    explosion_image = pygame.image.load("explosion.png").convert_alpha()
 
     screen.blit(submarine_image, (submarine1.pos_x, submarine_image_pos_y_init))
     screen.blit(background_image, (0, 0))
@@ -119,10 +129,19 @@ def main():
         screen.blit(background_image, (0, 0))
         screen.blit(submarine_image, (submarine1.pos_x, submarine1.pos_y))
 
+        projectiles_to_remove = []
+
         for projectile in projectiles:
             projectile.pos_x += projectile.velocity_x
             projectile.pos_y += projectile.velocity_y
             screen.blit(projectile.image, (projectile.pos_x, projectile.pos_y))
+
+            if projectile.check_collision():
+                projectiles_to_remove.append(projectile)
+                screen.blit(explosion_image, (projectile.pos_x, projectile.pos_y))
+
+        for projectile in projectiles_to_remove:
+            projectiles.remove(projectile)
 
         pygame.display.flip()
 
@@ -137,11 +156,11 @@ def main():
                     tank1.pumping_air_water('water')
                 elif event.key == K_LEFT:
                     submarine_image = pygame.transform.flip(original_submarine_image, True, False)
-                    submarine_direction_x = -5 #cambia la velocidad en eje x
+                    submarine_direction_x = -4
                     submarine1.set_direction(submarine_direction_x)
                 elif event.key == K_RIGHT:
                     submarine_image = original_submarine_image
-                    submarine_direction_x = 10#cambia la velocidad en eje x
+                    submarine_direction_x = 4
                     submarine1.set_direction(submarine_direction_x)
                 elif event.key == K_f:
                     new_projectile = Projectile(submarine1.pos_x, submarine1.pos_y, 6, 0.6, projectile_image_right, projectile_image_left, submarine1.direction)
@@ -152,8 +171,8 @@ def main():
                     submarine_direction_x = 0
 
         submarine1.calculate_mass()
-        clock.tick(target_fps)  # Limitamos los frames
+        clock.tick(target_fps)
 
 if __name__ == "__main__":
-    submarine_direction_x = 0  # Inicializar submarine_direction_x fuera del bucle while
+    submarine_direction_x = 0
     main()

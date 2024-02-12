@@ -8,7 +8,7 @@ Submarine Game es un juego en desarrollo pensado para aprender mediante la imple
 ![SubmarineGameIcon](https://github.com/MiguelRiosT/SG/blob/DevMigue/SGDEV/iconoSG.png)
 
 
-## ¡Selecciona el mapa!
+## __¡Selecciona el mapa!__
 Fondo marino de dia
 
 
@@ -19,7 +19,7 @@ Fondo marino de noche
 
 ![mapa2](https://github.com/MiguelRiosT/SG/blob/DevMigue/SGDEV/fondonoche.png)
 
-## ¡Selecciona tu aspecto!
+## __¡Selecciona tu aspecto!__
 
 Un clásico
 
@@ -29,3 +29,9 @@ Un clásico
 Un llameante
 
 ![aspecto2](https://github.com/MiguelRiosT/SG/blob/DevMigue/SGDEV/submatron2.png)
+
+## Proyectiles!  :boom:
+
+![proyectil1](https://github.com/MiguelRiosT/SG/blob/DevMigue/SGDEV/proyectile.png)
+
+![proyectil2](https://github.com/MiguelRiosT/SG/blob/DevMigue/SGDEV/proyectile2.png)
