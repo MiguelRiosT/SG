@@ -30,7 +30,9 @@ Fondo marino de noche
 
 
 
-<center> :flame: Un llameante :flame: </center>
+<center>:flame:
+ Un llameante :flame: 
+ </center>
 
 ![aspecto2](https://github.com/MiguelRiosT/SG/blob/DevMigue/SGDEV/submatron2.png)
 
