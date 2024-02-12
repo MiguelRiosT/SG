@@ -21,12 +21,16 @@ Fondo marino de noche
 
 ## __¡Selecciona tu aspecto!__
 
-Un clásico
+
+<center> :wine_glass:
+ Un clásico :wine_glass:
+ </center>
 
 ![aspecto1](https://github.com/MiguelRiosT/SG/blob/DevMigue/SGDEV/submatron1.png)
 
 
-Un llameante
+
+<center> :flame: Un llameante :flame: </center>
 
 ![aspecto2](https://github.com/MiguelRiosT/SG/blob/DevMigue/SGDEV/submatron2.png)
 
