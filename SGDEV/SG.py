@@ -12,10 +12,13 @@ submarine_image_pos_yLim = 500
 submarine_image_pos_y_init = sea_level
 
 g = 9.8
+Fep=1#Fuerza proyectil
+
 p = 1000
 v = 1
 dt = 1
-b = 250
+by = 250
+bx = 65
 e = - (p * g * v)
 
 class Reservoir:
@@ -39,22 +42,28 @@ class Reservoir:
                 self.actual_level = self.max_capacity
 
 class Submarine:
-    def __init__(self, tank, mass, actual_velocity, pos_x, pos_y):
+    def __init__(self, tank, mass, vel_x,vel_y, pos_x, pos_y,direction,Fv,Ig):
         self.pos_x = pos_x
         self.pos_y = pos_y
         self.mass = mass
-        self.actual_velocity = actual_velocity
+        self.vel_y = vel_y
+        self.vel_x = vel_x
         self.tank = tank
-        self.direction = 1
+        self.direction = direction
+        self.Fv = Fv
+        self.Ig=Ig
 
     def calculate_mass(self):
         self.mass = self.tank.actual_level
 
-    def calculate_velocity(self):
-        self.actual_velocity = dt * ((e / self.mass) + g - ((b * self.actual_velocity) / self.mass)) + self.actual_velocity
+    def calculate_velocity_y(self):
+        self.vel_y = dt * ((e / self.mass) + g - ((by * self.vel_y) / self.mass)) + self.vel_y
+
+    def calculate_velocity_x(self):
+        self.vel_x = (dt * ((self.Fv - bx*self.vel_x)/self.mass)) + self.vel_x
 
     def calculate_position(self):
-        self.pos_y = self.pos_y + self.actual_velocity
+        self.pos_y = self.pos_y + self.vel_y
 
         if self.pos_y > submarine_image_pos_yLim:
             self.pos_y = submarine_image_pos_yLim
@@ -62,7 +71,8 @@ class Submarine:
         if self.pos_y < sea_level:
             self.pos_y = sea_level
 
-        self.pos_x = max(0, min(self.pos_x + submarine_direction_x, SCREEN_WIDTH - submarine_image.get_width()))
+        self.pos_x = max(0, min(self.pos_x + self.vel_x, SCREEN_WIDTH - submarine_image.get_width()))
+
         return self.pos_x, self.pos_y
 
     def set_direction(self, direction):
@@ -101,14 +111,14 @@ def main():
     icon_image = pygame.image.load("icono.png")
     pygame.display.set_icon(icon_image)
 
-    tank1 = Reservoir(1005, 2, 50000, 'air')
-    submarine1 = Submarine(tank1, 2, 2, 150, 150)
+    tank1 = Reservoir(1005, 10, 5000, 'air')
+    submarine1 = Submarine(tank1, 2, 0, 150, 150, 150,0,0,0)
     projectiles = []
 
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption("SubmarineeeGameee")
 
-    original_submarine_image = pygame.image.load("submatron2.png").convert_alpha()
+    original_submarine_image = pygame.image.load("submatron1.png").convert_alpha()
     background_image = pygame.image.load("fondonoche.png").convert()
     submarine_image = original_submarine_image
     projectile_image_right = pygame.image.load("proyectile.png").convert_alpha()
@@ -123,8 +133,12 @@ def main():
     target_fps = 75
 
     while True:
-        submarine1.calculate_velocity()
+        submarine1.calculate_velocity_y()
+        submarine1.calculate_velocity_x()
         submarine1.calculate_position()
+
+        print(submarine1.vel_x)
+        print(submarine1.Fv)
 
         screen.blit(background_image, (0, 0))
         screen.blit(submarine_image, (submarine1.pos_x, submarine1.pos_y))
@@ -150,20 +164,32 @@ def main():
                 sys.exit()
 
             elif event.type == pygame.KEYDOWN:
+
                 if event.key == K_UP:
                     tank1.pumping_air_water('air')
                 elif event.key == K_DOWN:
                     tank1.pumping_air_water('water')
+
+                elif event.key == K_s:
+                    submarine1.Fv=0
+                    submarine1.calculate_velocity_x()
+
                 elif event.key == K_LEFT:
                     submarine_image = pygame.transform.flip(original_submarine_image, True, False)
-                    submarine_direction_x = -4
-                    submarine1.set_direction(submarine_direction_x)
+                    submarine1.direction = -1
+                    submarine1.Fv = -1000
+                    submarine1.calculate_velocity_x()
+                    submarine1.calculate_position()
+
                 elif event.key == K_RIGHT:
+                    submarine1.direction = 1
                     submarine_image = original_submarine_image
-                    submarine_direction_x = 4
-                    submarine1.set_direction(submarine_direction_x)
+                    submarine1.Fv = 1000
+                    submarine1.calculate_velocity_x()
+                    submarine1.calculate_position()
+
                 elif event.key == K_f:
-                    new_projectile = Projectile(submarine1.pos_x, submarine1.pos_y, 6, 0.6, projectile_image_right, projectile_image_left, submarine1.direction)
+                    new_projectile = Projectile(submarine1.pos_x, submarine1.pos_y, 5, 1, projectile_image_right, projectile_image_left, submarine1.direction)
                     projectiles.append(new_projectile)
 
             elif event.type == pygame.KEYUP:
