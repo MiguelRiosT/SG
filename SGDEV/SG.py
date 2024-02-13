@@ -12,15 +12,14 @@ submarine_image_pos_yLim = 500
 submarine_image_pos_y_init = sea_level
 
 g = 9.8
-Fep=1#Fuerza proyectil
-
+Fep=1#Fuerza Empuje proyectil en X
+Fd=100#Fuerza disparo proyectil
 p = 1000
 v = 1
 dt = 1
 by = 250
 bx = 65
-e = - (p * g * v)
-
+e = - (p * g * v) #Fuerza Empuje proyectil en Y
 class Reservoir:
     def __init__(self, actual_level, valve_flow, max_capacity, fluid_to_pump):
         self.actual_level = actual_level
@@ -84,14 +83,38 @@ class Submarine:
             self.direction = 0
 
 class Projectile:
-    def __init__(self, pos_x, pos_y, velocity_x, velocity_y, image_right, image_left, direction):
+    def __init__(self, pos_x, pos_y,masaproyectil, Vpx, Vpy, image_right, image_left, direction):
         self.pos_x = pos_x + original_submarine_image.get_width() - image_right.get_width()
         self.pos_y = pos_y + original_submarine_image.get_height() - image_right.get_height()
-        self.velocity_x = velocity_x * direction
-        self.velocity_y = velocity_y
+        self.masaproyectil= masaproyectil
+        self.Vpx = Vpx * direction
+        self.Vpy = Vpy
         self.image_right = image_right
         self.image_left = image_left
         self.image = image_right if direction == 1 else image_left
+
+    def calculate_masaproyectil(self):
+        self.masaproyectil = self.masaproyectil
+
+    def calculate_VelocidadPy(self):
+        self.Vpy = dt * ((Fep / self.masaproyectil) + g - ((by * self.Vpy) / self.masaproyectil)) + self.Vpy
+
+    def calculate_VelocidadPx(self):
+        self.Vpx = (dt * ((Fd - bx * self.Vpx) / self.masaproyectil)) + self.Vpx
+
+    def calculate_position(self):
+        self.pos_y = self.pos_y + self.Vpy
+
+        if self.pos_y > submarine_image_pos_yLim:
+            self.pos_y = submarine_image_pos_yLim
+
+        if self.pos_y < sea_level:
+            self.pos_y = sea_level
+
+        self.pos_x=self.pos_x + self.Vpx
+        #self.pos_x = max(0, min(self.pos_x + self.Vpx, SCREEN_WIDTH - submarine_image.get_width()))
+
+        return self.pos_x, self.pos_y
 
     def check_collision(self):
         if (
@@ -104,16 +127,19 @@ class Projectile:
         return False
 
 def main():
-    global submarine_direction_x, submarine_image, original_submarine_image
+    global submarine_direction_x, submarine_image, original_submarine_image,projectile_image_right,projectile_image_left
 
     pygame.init()
 
     icon_image = pygame.image.load("icono.png")
     pygame.display.set_icon(icon_image)
 
+
+
     tank1 = Reservoir(1005, 10, 5000, 'air')
     submarine1 = Submarine(tank1, 2, 0, 150, 150, 150,0,0,0)
-    projectiles = []
+
+
 
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption("SubmarineeeGameee")
@@ -124,6 +150,10 @@ def main():
     projectile_image_right = pygame.image.load("proyectile.png").convert_alpha()
     projectile_image_left = pygame.transform.flip(projectile_image_right, True, False)
     explosion_image = pygame.image.load("explosion.png").convert_alpha()
+
+    new_projectile = Projectile(submarine1.pos_x, submarine1.pos_y, 5, 2, 2, projectile_image_right, projectile_image_left, submarine1.direction)
+    projectiles = []
+
 
     screen.blit(submarine_image, (submarine1.pos_x, submarine_image_pos_y_init))
     screen.blit(background_image, (0, 0))
@@ -136,6 +166,9 @@ def main():
         submarine1.calculate_velocity_y()
         submarine1.calculate_velocity_x()
         submarine1.calculate_position()
+        #new_projectile.calculate_VelocidadPx()
+       # new_projectile.calculate_VelocidadPy()
+        #new_projectile.calculate_position()
 
         print(submarine1.vel_x)
         print(submarine1.Fv)
@@ -146,9 +179,9 @@ def main():
         projectiles_to_remove = []
 
         for projectile in projectiles:
-            projectile.pos_x += projectile.velocity_x
-            projectile.pos_y += projectile.velocity_y
-            screen.blit(projectile.image, (projectile.pos_x, projectile.pos_y))
+            projectile.pos_x += projectile.Vpx
+            projectile.pos_y += projectile.Vpy
+            screen.blit(projectile.image, (new_projectile.pos_x, new_projectile.pos_y))
 
             if projectile.check_collision():
                 projectiles_to_remove.append(projectile)
@@ -189,7 +222,7 @@ def main():
                     submarine1.calculate_position()
 
                 elif event.key == K_f:
-                    new_projectile = Projectile(submarine1.pos_x, submarine1.pos_y, 5, 1, projectile_image_right, projectile_image_left, submarine1.direction)
+
                     projectiles.append(new_projectile)
 
             elif event.type == pygame.KEYUP:
