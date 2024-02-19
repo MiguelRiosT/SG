@@ -157,12 +157,12 @@ def main():
     projectiles = []
 
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-    pygame.display.set_caption("SG")
+    pygame.display.set_caption("SubG")
 
-    original_submarine_image = pygame.image.load("submatron1.png").convert_alpha()
+    original_submarine_image = pygame.image.load("submatron2.png").convert_alpha()
     background_image = pygame.image.load("fondonoche.png").convert()
     submarine_image = original_submarine_image
-    projectile_image_right = pygame.image.load("proyectile.png").convert_alpha()
+    projectile_image_right = pygame.image.load("proyectile2.png").convert_alpha()
     projectile_image_left = pygame.transform.flip(projectile_image_right, True, False)
     explosion_image = pygame.image.load("explosion.png").convert_alpha()
 
@@ -178,14 +178,18 @@ def main():
         submarine1.calculate_velocity_x()
         submarine1.calculate_position()
 
+
         screen.blit(background_image, (0, 0))
         screen.blit(submarine_image, (submarine1.pos_x, submarine1.pos_y))
 
         projectiles_to_remove = []
 
         for projectile in projectiles:
+            projectile.calculate_VelocidadPx()
+            projectile.calculate_VelocidadPy()
             projectile.pos_x += projectile.Vpx
             projectile.pos_y += projectile.Vpy
+
             screen.blit(projectile.image, (projectile.pos_x, projectile.pos_y))
 
             # Verificar colisión con los bordes de la ventana
@@ -231,7 +235,7 @@ def main():
 
                 elif event.key == K_f:
                     # Crea un nuevo proyectil en la dirección del submarino
-                    new_projectile = Projectile(submarine1.pos_x, submarine1.pos_y, 1, 10, 3,projectile_image_right, projectile_image_left, submarine1.direction)
+                    new_projectile = Projectile(submarine1.pos_x, submarine1.pos_y, 500, 100, 0,projectile_image_right, projectile_image_left, submarine1.direction)
 
                     projectiles.append(new_projectile)
 
