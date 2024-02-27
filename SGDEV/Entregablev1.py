@@ -2,26 +2,28 @@ import pygame
 from pygame.locals import *
 import sys
 
-SCREEN_WIDTH = 1738
-SCREEN_HEIGHT = 971
-
-sea_level = 25
-
+SCREEN_WIDTH = 1738 # ANCHO DE VENTANA
+SCREEN_HEIGHT = 971 # ALTO DE VENTANA
+sea_level = 25 # NIVEL DEL MAR
 submarine_direction_x = 0
 submarine_image_pos_yLim = 500
 submarine_image_pos_y_init = sea_level
 
-g = 9.8
-Fep = 0.2  # Fuerza Empuje proyectil en X
-Fd = 1  # Fuerza disparo proyectil
-p = 1000
-v = 1
+g = 9.8 # Gravedad
+Fep = 0.2  # Fuerza Empuje X
+
+Fd = 1  # Fuerza Disparo
+p = 1000 # Densidad
+v = 1 # Volumen
 dt = 1
-by = 250
-bx = 65
-e = -(p * g * v)  # Fuerza Empuje proyectil en Y
+by = 250 #Friccion EJE Y
+bx = 65 #Friccion EJE X
+e = -(p * g * v) # Fuerza Empuje Y
 
 
+
+
+# CLASE - TANQUE INTERNO DEL SUBMARINO
 class Reservoir:
     def __init__(self, actual_level, valve_flow, max_capacity, fluid_to_pump):
         self.actual_level = actual_level
@@ -43,6 +45,7 @@ class Reservoir:
                 self.actual_level = self.max_capacity
 
 
+# CLASE - SUBMARINO
 class Submarine:
     def __init__(self, tank, mass, vel_x, vel_y, pos_x, pos_y, direction, Fv, Ig):
         self.pos_x = pos_x
@@ -86,6 +89,7 @@ class Submarine:
             self.direction = 0
 
 
+#CLASE - PROYECTIL
 class Projectile:
     def __init__(self, pos_x, pos_y, masaproyectil, Vpx, Vpy, image_right, image_left, direction):
         self.pos_x = pos_x + original_submarine_image.get_width() - image_right.get_width()
@@ -138,11 +142,6 @@ class Projectile:
             return True
         return False
 
-    def update(self):  # Agrega este método
-        self.calculate_VelocidadPx()
-        self.calculate_VelocidadPy()
-        self.calculate_position()
-
 
 def main():
     global submarine_direction_x, submarine_image, original_submarine_image, projectile_image_right, projectile_image_left
@@ -178,7 +177,6 @@ def main():
         submarine1.calculate_velocity_x()
         submarine1.calculate_position()
 
-
         screen.blit(background_image, (0, 0))
         screen.blit(submarine_image, (submarine1.pos_x, submarine1.pos_y))
 
@@ -192,7 +190,7 @@ def main():
 
             screen.blit(projectile.image, (projectile.pos_x, projectile.pos_y))
 
-            # Verificar colisión con los bordes de la ventana
+            # CONDICION SI IMPACTA CON BORDE DE VENTANA
             if projectile.check_collision() or (
                     projectile.pos_x < 0 or projectile.pos_x > SCREEN_WIDTH - projectile.image.get_width()
                     or projectile.pos_y < 0 or projectile.pos_y > SCREEN_HEIGHT
@@ -205,6 +203,7 @@ def main():
 
         pygame.display.flip()
 
+        # CONFIGURACION DE TECLAS
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit()
@@ -234,9 +233,7 @@ def main():
                     submarine1.calculate_position()
 
                 elif event.key == K_f:
-                    # Crea un nuevo proyectil en la dirección del submarino
-                    new_projectile = Projectile(submarine1.pos_x, submarine1.pos_y, 500, 100, 0,projectile_image_right, projectile_image_left, submarine1.direction)
-
+                    new_projectile = Projectile(submarine1.pos_x, submarine1.pos_y, 500, 160, 0,projectile_image_right, projectile_image_left, submarine1.direction)
                     projectiles.append(new_projectile)
 
         submarine1.calculate_mass()
