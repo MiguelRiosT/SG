@@ -1,8 +1,8 @@
 import pygame
 from pygame.locals import *
 import sys
-import matplotlib.pyplot as plt
-from datetime import datetime, timedelta
+import matplotlib.pyplot as plt # LIBRERIA PARA GRAFICOS - pip install matplotlib
+from datetime import datetime, timedelta # MANEJO DE TIEMPOS A TRAVES DE LIBRERIA DATETIME Y TIMEDELTA
 
 SCREEN_WIDTH = 1738  # ANCHO DE VENTANA
 SCREEN_HEIGHT = 971  # ALTO DE VENTANA
@@ -45,13 +45,21 @@ class Reservoir:
                 self.actual_level = self.max_capacity
 
     # LAZO CERRADO
+    # Lógica encargada de estabilizar el submarino en una posicion en Y
     def lazocerrading(self, posicionYsubmarino, target_y):
 
+        # En caso de que el submarino este por debajo del punto indicado
+        #Bombeara aire para hacerlo subir
         if posicionYsubmarino > target_y:
             self.pumping_air_water("air")
 
+        # En caso de que el submarino este por arriba del punto indicado
+        # Bombeara agua para hacerlo bajar
         elif posicionYsubmarino < target_y:
             self.pumping_air_water("water")
+
+        # En caso de que el submarino este en el punto indicado en Y
+        # No bombeara nada
         elif posicionYsubmarino == target_y:
             print("nada")
 
@@ -100,78 +108,42 @@ class Submarine:
             self.direction = 0
 
 
-# CLASE - PROYECTIL
-class Projectile:
-    def __init__(self, pos_x, pos_y, masaproyectil, Vpx, Vpy, image_right, image_left, direction):
-        self.pos_x = pos_x + original_submarine_image.get_width() - image_right.get_width()
-        self.pos_y = pos_y + original_submarine_image.get_height() - image_right.get_height()
-        self.masaproyectil = masaproyectil
-        self.Vpx = Vpx * direction
-        self.Vpy = Vpy
-        self.image_right = image_right
-        self.image_left = image_left
-        self.image = image_right if direction == 1 else image_left
-
-    def calculate_masaproyectil(self):
-        self.masaproyectil = self.masaproyectil
-
-    def calculate_VelocidadPy(self):
-
-        self.Vpy = dt * ((Fep / self.masaproyectil) + g - ((by * self.Vpy) / self.masaproyectil)) + self.Vpy
-
-    def calculate_VelocidadPx(self):
-        self.Vpx = (dt * ((Fd - bx * self.Vpx) / self.masaproyectil)) + self.Vpx
-
-    def calculate_position(self):
-        self.pos_y = self.pos_y + self.Vpy
-
-        if self.pos_y > submarine_image_pos_yLim:
-            self.pos_y = submarine_image_pos_yLim
-
-        if self.pos_y < sea_level:
-            self.pos_y = sea_level
-
-        self.pos_x = self.pos_x + self.Vpx
-
-        # Verificar colisión con los bordes de la ventana
-        if self.pos_x < 0 or self.pos_x > SCREEN_WIDTH - self.image.get_width():
-            self.Vpx = -self.Vpx  # Invertir la velocidad en X al colisionar con los bordes
-
-        if self.pos_y < 0 or self.pos_y > SCREEN_HEIGHT:
-            self.Vpy = -self.Vpy  # Invertir la velocidad en Y al colisionar con los bordes
-
-        return self.pos_x, self.pos_y
-
-    def check_collision(self):
-        if (
-                self.pos_x < 0
-                or self.pos_x > SCREEN_WIDTH - self.image.get_width()
-                or self.pos_y < 0
-                or self.pos_y > SCREEN_HEIGHT - self.image.get_height()
-        ):
-            return True
-        return False
-
-
 # LAZO CERRADO
+# Clase encargada de contener los valores gráficos, actualizar su posicion e ilustrarla en pantalla
 class Crosshair:
     def __init__(self):
-        self.length = 20
-        self.thickness = 4
-        self.color = (255, 255, 255)  # Color blanco por defecto
+        #Definicion de constantes
+        self.length = 20 #Longitud
+        self.thickness = 10 #Grosor
+        self.color = (255, 255, 255)  # Color: Blanco
 
+    #Refresca la posicion en X y Y de la mira
     def update_position(self, mouse_pos):
-        self.center = mouse_pos
+        self.mouse_pos = mouse_pos
 
+    #Se encarga de graficar la mira
     def draw(self, surface):
-        pygame.draw.line(surface, self.color, (self.center[0] - self.length, self.center[1]),
-                         (self.center[0] + self.length, self.center[1]), self.thickness)
-        pygame.draw.line(surface, self.color, (self.center[0], self.center[1] - self.length),
-                         (self.center[0], self.center[1] + self.length), self.thickness)
+
+        #Usando las constantes de la clase Crosshair grafica el eje X de la mira
+        #Usando la funcion .line graficamos en X la linea que corresponde al plano en X pasandole la superficie, color,
+        #posicion donde comienza y donde termina y finalmente el grosor
+        pygame.draw.line(surface, self.color,
+                         #Posicion de Inicio de para graficar la linea en donde se toma la posicion en x de la posicion
+                         # del mouse y se le resta la longitud,y se pasa la posicion en y del mouse
+                         (self.mouse_pos[0] - self.length, self.mouse_pos[1]),
+                         # Posicion de Fin de para graficar la linea en donde se toma la posicion en x de la posicion
+                         # del mouse y se le suma la longitud y se pasa la posicion en y del mouse
+                         (self.mouse_pos[0] + self.length, self.mouse_pos[1]),
+                         self.thickness)
+
+        # Usando las constantes de la clase Crosshair grafica el eje Y de la mira empleando
+        # la misma logica de la linea anterior en X  pero esta vez para Y,dejando x constante como la posiscion de mouse
+        pygame.draw.line(surface, self.color, (self.mouse_pos[0], self.mouse_pos[1] - self.length),
+                         (self.mouse_pos[0], self.mouse_pos[1] + self.length), self.thickness)
 
 
 def main():
-    global submarine_direction_x, submarine_image, original_submarine_image, projectile_image_right, projectile_image_left
+    global submarine_direction_x, submarine_image, original_submarine_image
 
     pygame.init()
 
@@ -180,7 +152,7 @@ def main():
 
     tank1 = Reservoir(1005, 10, 5000, 'air')
     submarine1 = Submarine(tank1, 2, 0, 150, 150, 150, 1, 0, 0)
-    projectiles = []
+
 
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption("SubG")
@@ -188,9 +160,7 @@ def main():
     original_submarine_image = pygame.image.load("submatron2.png").convert_alpha()
     background_image = pygame.image.load("fondonoche.png").convert()
     submarine_image = original_submarine_image
-    projectile_image_right = pygame.image.load("proyectile2.png").convert_alpha()
-    projectile_image_left = pygame.transform.flip(projectile_image_right, True, False)
-    explosion_image = pygame.image.load("explosion.png").convert_alpha()
+
 
     screen.blit(submarine_image, (submarine1.pos_x, submarine_image_pos_y_init))
     screen.blit(background_image, (0, 0))
@@ -199,15 +169,17 @@ def main():
     clock = pygame.time.Clock()
     target_fps = 75
 
+    #LAZO CERRADO INICIALIZAMOS
     crosshair = Crosshair()
     target_y = 30
-
     pos_y_values = []  # Lista para almacenar los valores de posición en Y
     time_values = []  # Lista para almacenar los valores de tiempo en segundos
 
+    #MANEJO DE TIEMPOS LAZO CERRADO GRAFICA
     start_time = datetime.now()
     end_time = start_time + timedelta(seconds=10)
 
+    #BUCLE QUE DURA LO DETERMINADO EN end_time
     while datetime.now() < end_time:
         current_time = datetime.now()
         elapsed_time = (current_time - start_time).total_seconds()
@@ -217,35 +189,14 @@ def main():
         submarine1.calculate_position()
 
         # LAZO CERRADO
-        posicionYsubmarino = submarine1.pos_y
-        tank1.lazocerrading(posicionYsubmarino, target_y)
-
-        pos_y_values.append(submarine1.pos_y)
-        time_values.append(elapsed_time)
+        posicionYsubmarino = submarine1.pos_y #Se guarda la posicion del submarino en el eje Y
+        tank1.lazocerrading(posicionYsubmarino, target_y) #Se aplica la función que implementa la logica de lazo cerrado
+        pos_y_values.append(submarine1.pos_y) #Agregamos a las listas los valores del submarino en Y en el tiempo
+        time_values.append(elapsed_time) #Manejo de tiempo
 
         screen.blit(background_image, (0, 0))
         screen.blit(submarine_image, (submarine1.pos_x, submarine1.pos_y))
 
-        projectiles_to_remove = []
-
-        for projectile in projectiles:
-            projectile.calculate_VelocidadPx()
-            projectile.calculate_VelocidadPy()
-            projectile.pos_x += projectile.Vpx
-            projectile.pos_y += projectile.Vpy
-
-            screen.blit(projectile.image, (projectile.pos_x, projectile.pos_y))
-
-            # CONDICION SI IMPACTA CON BORDE DE VENTANA
-            if projectile.check_collision() or (
-                    projectile.pos_x < 0 or projectile.pos_x > SCREEN_WIDTH - projectile.image.get_width()
-                    or projectile.pos_y < 0 or projectile.pos_y > SCREEN_HEIGHT
-            ):
-                projectiles_to_remove.append(projectile)
-                screen.blit(explosion_image, (projectile.pos_x, projectile.pos_y))
-
-        for projectile in projectiles_to_remove:
-            projectiles.remove(projectile)
 
         pygame.display.flip()
 
@@ -254,27 +205,30 @@ def main():
             if event.type == pygame.QUIT:
                 sys.exit()
 
-
+            #LAZO CERRADO - CAPTURA DE VALOR POS Y DEL MOUSE AL DAR CLICK IZQUIERDO
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                target_y = crosshair.center[1]
+                target_y = crosshair.mouse_pos[1]#mouse_pos[0] = POS X  y mouse_pos[1] = POS Y
 
         submarine1.calculate_mass()
         clock.tick(target_fps)
-        mouse_pos = pygame.mouse.get_pos()
-        crosshair.update_position(mouse_pos)
-        crosshair.draw(screen)
+
+        #LAZO CEERADO
+        mouse_pos = pygame.mouse.get_pos() #se guarda el valor de la posicion del mouse
+        crosshair.update_position(mouse_pos) #se actualzua la posicion de la mira
+        crosshair.draw(screen) #se dibuja en el juego la mira
         pygame.display.flip()
 
         print("Submarine position: ", submarine1.pos_y)
         print("MOUSE POSITION: ", target_y)
 
-    plt.plot(time_values, pos_y_values)
-    plt.xlabel('Tiempo (segundos)')
-    plt.ylabel('Posición en Y del Submarino')
-    plt.title('Posición en Y del Submarino vs Tiempo')
-    plt.xticks(range(int(min(time_values)), int(max(time_values)) + 1, 1))
+    #LAZO CERRADO - GRAFICA
+    plt.plot(time_values, pos_y_values) #Se realiza un plot graph de Posicion en Y del submarino VS Tiempo
+    plt.xlabel('Tiempo (segundos)') #Nombre del eje x dentro de la grafica
+    plt.ylabel('Posición en Y del Submarino') #Nombre del eje y dentro de la grafica
+    plt.title('Posición en Y del Submarino vs Tiempo') #Titulo de la grafica
+    plt.xticks(range(int(min(time_values)), int(max(time_values)) + 1, 1)) # Valores Eje x de uno en uno
 
-    plt.show()
+    plt.show() # Se muestra el grafico
 
 
 if __name__ == "__main__":
